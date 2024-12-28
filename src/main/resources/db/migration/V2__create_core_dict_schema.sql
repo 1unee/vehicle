@@ -155,3 +155,26 @@ COMMENT ON COLUMN dict.material_type.created_by IS 'Пользователь, с
 COMMENT ON COLUMN dict.material_type.created_at IS 'Время создания записи';
 COMMENT ON COLUMN dict.material_type.updated_by IS 'Пользователь, изменивший запись';
 COMMENT ON COLUMN dict.material_type.updated_at IS 'Время изменения записи';
+
+
+CREATE TABLE dict.country
+(
+    id                  UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
+    code                INT4            NOT NULL UNIQUE,
+    value               VARCHAR(255)    NOT NULL,
+    short_name          VARCHAR(10)     NOT NULL,
+    created_by          VARCHAR(128)    NOT NULL,
+    created_at          TIMESTAMPTZ(6)  DEFAULT NOW(),
+    updated_by          VARCHAR(128),
+    updated_at          TIMESTAMPTZ(6)
+);
+
+COMMENT ON TABLE dict.country IS 'Справочник стран';
+COMMENT ON COLUMN dict.country.id IS 'ID';
+COMMENT ON COLUMN dict.country.code IS 'Код страны';
+COMMENT ON COLUMN dict.country.value IS 'Название страны на русском';
+COMMENT ON COLUMN dict.country.short_name IS 'Код страны (например, RUS, ENG, BRT)';
+COMMENT ON COLUMN dict.country.created_by IS 'Пользователь, создавший запись';
+COMMENT ON COLUMN dict.country.created_at IS 'Время создания записи';
+COMMENT ON COLUMN dict.country.updated_by IS 'Пользователь, изменивший запись';
+COMMENT ON COLUMN dict.country.updated_at IS 'Время изменения записи';

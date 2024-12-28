@@ -20,18 +20,20 @@ COMMENT ON COLUMN dict.measure_value.updated_at IS 'Время изменени�
 
 CREATE TABLE dict.vehicle_type
 (
-    id          UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
-    code        INT4            NOT NULL UNIQUE,
-    value       VARCHAR(256)    NOT NULL,
-    description VARCHAR(2048),
-    created_by  VARCHAR(128)    NOT NULL,
-    created_at  TIMESTAMPTZ(6)  DEFAULT NOW(),
-    updated_by  VARCHAR(128),
-    updated_at  TIMESTAMPTZ(6)
+    id                      UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
+    top_vehicle_type_id     UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
+    code                    INT4            NOT NULL UNIQUE,
+    value                   VARCHAR(256)    NOT NULL,
+    description             VARCHAR(2048),
+    created_by              VARCHAR(128)    NOT NULL,
+    created_at              TIMESTAMPTZ(6)  DEFAULT NOW(),
+    updated_by              VARCHAR(128),
+    updated_at              TIMESTAMPTZ(6)
 );
 
 COMMENT ON TABLE dict.vehicle_type IS 'Типы транспортного средства (ТС)';
 COMMENT ON COLUMN dict.vehicle_type.id IS 'ID';
+COMMENT ON COLUMN dict.vehicle_type.top_vehicle_type_id IS 'Ссылка на категорию (древовидную) транспортного средства. Если имеет значение NULL, значит корневая категория';
 COMMENT ON COLUMN dict.vehicle_type.code IS 'Код типа транспортного средства';
 COMMENT ON COLUMN dict.vehicle_type.value IS 'Название класса автомобиля';
 COMMENT ON COLUMN dict.vehicle_type.description IS 'Описание характеристик класса';
@@ -41,306 +43,22 @@ COMMENT ON COLUMN dict.vehicle_type.updated_by IS 'Пользователь, и�
 COMMENT ON COLUMN dict.vehicle_type.updated_at IS 'Время изменения записи';
 
 
-CREATE TABLE dict.car_class
-(
-    id              UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
-    vehicle_type_id UUID,
-    code            INT4            NOT NULL UNIQUE,
-    value           VARCHAR(256)    NOT NULL,
-    description     VARCHAR(2048),
-    letter          VARCHAR(1)      NOT NULL,
-    created_by      VARCHAR(128)    NOT NULL,
-    created_at      TIMESTAMPTZ(6)  DEFAULT NOW(),
-    updated_by      VARCHAR(128),
-    updated_at      TIMESTAMPTZ(6),
-
-    CONSTRAINT fk_vehicle_type_id
-        FOREIGN KEY (vehicle_type_id) REFERENCES dict.vehicle_type (id)
-            ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-COMMENT ON TABLE dict.car_class IS 'Классы автомобилей';
-COMMENT ON COLUMN dict.car_class.id IS 'Идентификатор класса автомобиля';
-COMMENT ON COLUMN dict.car_class.vehicle_type_id IS 'Ссылка на тип транспортного средства';
-COMMENT ON COLUMN dict.car_class.code IS 'Код класса автомобиля';
-COMMENT ON COLUMN dict.car_class.value IS 'Название класса автомобиля';
-COMMENT ON COLUMN dict.car_class.description IS 'Описание характеристик класса';
-COMMENT ON COLUMN dict.car_class.created_by IS 'Пользователь, создавший запись';
-COMMENT ON COLUMN dict.car_class.created_at IS 'Время создания записи';
-COMMENT ON COLUMN dict.car_class.updated_by IS 'Пользователь, изменивший запись';
-COMMENT ON COLUMN dict.car_class.updated_at IS 'Время изменения записи';
-
-
-CREATE TABLE dict.truck_class
-(
-    id                  UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
-    vehicle_type_id     UUID,
-    code                INT4            NOT NULL UNIQUE,
-    value               VARCHAR(256)    NOT NULL,
-    description         VARCHAR(2048),
-    max_payload         UUID,
-    created_by          VARCHAR(128)    NOT NULL,
-    created_at          TIMESTAMPTZ(6)  DEFAULT NOW(),
-    updated_by          VARCHAR(128),
-    updated_at          TIMESTAMPTZ(6),
-
-    CONSTRAINT fk_vehicle_type_id_truck
-        FOREIGN KEY (vehicle_type_id) REFERENCES dict.vehicle_type (id)
-            ON UPDATE NO ACTION ON DELETE NO ACTION,
-    CONSTRAINT fk_max_payload
-        FOREIGN KEY (max_payload) REFERENCES dict.measure_value (id)
-            ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-COMMENT ON TABLE dict.truck_class IS 'Классы грузовых автомобилей';
-COMMENT ON COLUMN dict.truck_class.id IS 'Идентификатор класса грузового автомобиля';
-COMMENT ON COLUMN dict.truck_class.vehicle_type_id IS 'Ссылка на тип транспортного средства';
-COMMENT ON COLUMN dict.truck_class.code IS 'Код класса грузового автомобиля';
-COMMENT ON COLUMN dict.truck_class.value IS 'Название класса грузового автомобиля';
-COMMENT ON COLUMN dict.truck_class.max_payload IS 'Ссылка (значение) грузоподъемности грузового автомобиля (обычно в тоннах)';
-COMMENT ON COLUMN dict.truck_class.description IS 'Описание класса грузового автомобиля';
-COMMENT ON COLUMN dict.truck_class.created_by IS 'Пользователь, создавший запись';
-COMMENT ON COLUMN dict.truck_class.created_at IS 'Время создания записи';
-COMMENT ON COLUMN dict.truck_class.updated_by IS 'Пользователь, изменивший запись';
-COMMENT ON COLUMN dict.truck_class.updated_at IS 'Время изменения записи';
-
-
-CREATE TABLE dict.motorcycle_class
-(
-    id              UUID           DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
-    vehicle_type_id UUID,
-    code            INT4            NOT NULL UNIQUE,
-    value           VARCHAR(256)    NOT NULL,
-    description     VARCHAR(2048),
-    wheel_amount    INT4            NOT NULL,
-    created_by      VARCHAR(128)    NOT NULL,
-    created_at      TIMESTAMPTZ(6)  DEFAULT NOW(),
-    updated_by      VARCHAR(128),
-    updated_at      TIMESTAMPTZ(6),
-
-    CONSTRAINT fk_vehicle_type_id_motorcycle
-        FOREIGN KEY (vehicle_type_id) REFERENCES dict.vehicle_type (id)
-            ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-COMMENT ON TABLE dict.motorcycle_class IS 'Классы мотоциклов';
-COMMENT ON COLUMN dict.motorcycle_class.id IS 'Идентификатор класса мотоцикла';
-COMMENT ON COLUMN dict.motorcycle_class.vehicle_type_id IS 'Ссылка на тип транспортного средства';
-COMMENT ON COLUMN dict.motorcycle_class.code IS 'Код класса мотоцикла';
-COMMENT ON COLUMN dict.motorcycle_class.value IS 'Название класса мотоцикла';
-COMMENT ON COLUMN dict.motorcycle_class.wheel_amount IS 'Количество колес у мотоцикла';
-COMMENT ON COLUMN dict.motorcycle_class.description IS 'Описание класса мотоцикла';
-COMMENT ON COLUMN dict.motorcycle_class.created_by IS 'Пользователь, создавший запись';
-COMMENT ON COLUMN dict.motorcycle_class.created_at IS 'Время создания записи';
-COMMENT ON COLUMN dict.motorcycle_class.updated_by IS 'Пользователь, изменивший запись';
-COMMENT ON COLUMN dict.motorcycle_class.updated_at IS 'Время изменения записи';
-
-
-CREATE TABLE dict.watercraft_class
-(
-    id              UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
-    vehicle_type_id UUID,
-    code            INT4            NOT NULL UNIQUE,
-    value           VARCHAR(256)    NOT NULL,
-    description     VARCHAR(2048),
-    displacement    UUID            NOT NULL,
-    created_by      VARCHAR(128)    NOT NULL,
-    created_at      TIMESTAMPTZ(6)  DEFAULT NOW(),
-    updated_by      VARCHAR(128),
-    updated_at      TIMESTAMPTZ(6),
-
-    CONSTRAINT fk_vehicle_type_id_watercraft
-        FOREIGN KEY (vehicle_type_id) REFERENCES dict.vehicle_type (id)
-            ON UPDATE NO ACTION ON DELETE NO ACTION,
-    CONSTRAINT fk_displacement
-        FOREIGN KEY (displacement) REFERENCES dict.measure_value (id)
-            ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-COMMENT ON TABLE dict.watercraft_class IS 'Классы водных средств';
-COMMENT ON TABLE dict.watercraft_class IS 'Классы водных средств';
-COMMENT ON COLUMN dict.watercraft_class.id IS 'Идентификатор класса водного средства';
-COMMENT ON COLUMN dict.watercraft_class.vehicle_type_id IS 'Ссылка на тип транспортного средства';
-COMMENT ON COLUMN dict.watercraft_class.code IS 'Код класса водного средства';
-COMMENT ON COLUMN dict.watercraft_class.value IS 'Название класса водного средства';
-COMMENT ON COLUMN dict.watercraft_class.displacement IS 'Ссылка (значение) водоизмещения водного средства (обычно в тоннах)';
-COMMENT ON COLUMN dict.watercraft_class.description IS 'Описание класса водного средства';
-COMMENT ON COLUMN dict.watercraft_class.created_by IS 'Пользователь, создавший запись';
-COMMENT ON COLUMN dict.watercraft_class.created_at IS 'Время создания записи';
-COMMENT ON COLUMN dict.watercraft_class.updated_by IS 'Пользователь, изменивший запись';
-COMMENT ON COLUMN dict.watercraft_class.updated_at IS 'Время изменения записи';
-
-
-CREATE TABLE dict.aircraft_class
-(
-    id                    UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
-    vehicle_type_id       UUID,
-    code                  INT4            NOT NULL UNIQUE,
-    value                 VARCHAR(256)    NOT NULL,
-    description           VARCHAR(2048),
-    "range"               UUID,
-    created_by            VARCHAR(128)    NOT NULL,
-    created_at            TIMESTAMPTZ(6)  DEFAULT NOW(),
-    updated_by            VARCHAR(128),
-    updated_at            TIMESTAMPTZ(6),
-
-    CONSTRAINT fk_vehicle_type_id_aircraft
-        FOREIGN KEY (vehicle_type_id) REFERENCES dict.vehicle_type (id)
-            ON UPDATE NO ACTION ON DELETE NO ACTION,
-    CONSTRAINT fk_range
-        FOREIGN KEY ("range") REFERENCES dict.measure_value (id)
-            ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-COMMENT ON TABLE dict.aircraft_class IS 'Классы воздушных средств';
-COMMENT ON COLUMN dict.aircraft_class.id IS 'Идентификатор класса воздушного средства';
-COMMENT ON COLUMN dict.aircraft_class.vehicle_type_id IS 'Ссылка на тип транспортного средства';
-COMMENT ON COLUMN dict.aircraft_class.code IS 'Код класса воздушного средства';
-COMMENT ON COLUMN dict.aircraft_class.value IS 'Название класса воздушного средства';
-COMMENT ON COLUMN dict.aircraft_class.range IS 'Ссылка (значение) дальности полета воздушного средства (обычно в км)';
-COMMENT ON COLUMN dict.aircraft_class.description IS 'Описание класса воздушного средства';
-COMMENT ON COLUMN dict.aircraft_class.created_by IS 'Пользователь, создавший запись';
-COMMENT ON COLUMN dict.aircraft_class.created_at IS 'Время создания записи';
-COMMENT ON COLUMN dict.aircraft_class.updated_by IS 'Пользователь, изменивший запись';
-COMMENT ON COLUMN dict.aircraft_class.updated_at IS 'Время изменения записи';
-
-
-CREATE TABLE dict.public_transport_class
-(
-    id              UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
-    vehicle_type_id UUID,
-    code            INT4            NOT NULL UNIQUE,
-    value           VARCHAR(256)    NOT NULL,
-    description     VARCHAR(2048),
-    created_by      VARCHAR(128)    NOT NULL,
-    created_at      TIMESTAMPTZ(6)  DEFAULT NOW(),
-    updated_by      VARCHAR(128),
-    updated_at      TIMESTAMPTZ(6),
-
-    CONSTRAINT fk_vehicle_type_id_public_transport
-        FOREIGN KEY (vehicle_type_id) REFERENCES dict.vehicle_type (id)
-            ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-COMMENT ON TABLE dict.public_transport_class IS 'Классы общественного транспорта';
-COMMENT ON COLUMN dict.public_transport_class.id IS 'Идентификатор класса общественного транспорта';
-COMMENT ON COLUMN dict.public_transport_class.vehicle_type_id IS 'Ссылка на тип транспортного средства';
-COMMENT ON COLUMN dict.public_transport_class.code IS 'Код класса общественного транспорта';
-COMMENT ON COLUMN dict.public_transport_class.value IS 'Название класса общественного транспорта';
-COMMENT ON COLUMN dict.public_transport_class.description IS 'Описание класса общественного транспорта';
-COMMENT ON COLUMN dict.public_transport_class.created_by IS 'Пользователь, создавший запись';
-COMMENT ON COLUMN dict.public_transport_class.created_at IS 'Время создания записи';
-COMMENT ON COLUMN dict.public_transport_class.updated_by IS 'Пользователь, изменивший запись';
-COMMENT ON COLUMN dict.public_transport_class.updated_at IS 'Время изменения записи';
-
-
-CREATE TABLE dict.trailer_class
-(
-    id              UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
-    vehicle_type_id UUID,
-    code            INT4            NOT NULL UNIQUE,
-    value           VARCHAR(256)    NOT NULL,
-    description     VARCHAR(2048),
-    binding_type    VARCHAR(256),
-    max_payload     UUID,
-    created_by      VARCHAR(128)    NOT NULL,
-    created_at      TIMESTAMPTZ(6)  DEFAULT NOW(),
-    updated_by      VARCHAR(128),
-    updated_at      TIMESTAMPTZ(6),
-
-    CONSTRAINT fk_vehicle_type_id_trailer
-        FOREIGN KEY (vehicle_type_id) REFERENCES dict.vehicle_type (id)
-            ON UPDATE NO ACTION ON DELETE NO ACTION,
-    CONSTRAINT fk_max_payload
-        FOREIGN KEY (max_payload) REFERENCES dict.measure_value (id)
-            ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-COMMENT ON TABLE dict.trailer_class IS 'Классы прицепов';
-COMMENT ON COLUMN dict.trailer_class.id IS 'Идентификатор класса прицепа';
-COMMENT ON COLUMN dict.trailer_class.vehicle_type_id IS 'Ссылка на тип транспортного средства';
-COMMENT ON COLUMN dict.trailer_class.code IS 'Код класса прицепа';
-COMMENT ON COLUMN dict.trailer_class.value IS 'Название класса прицепа';
-COMMENT ON COLUMN dict.trailer_class.binding_type IS 'Тип крепления прицепа';
-COMMENT ON COLUMN dict.trailer_class.max_payload IS 'Ссылка (значение) грузоподъемности прицепа (обычно в тоннах)';
-COMMENT ON COLUMN dict.trailer_class.description IS 'Описание класса прицепа';
-COMMENT ON COLUMN dict.trailer_class.created_by IS 'Пользователь, создавший запись';
-COMMENT ON COLUMN dict.trailer_class.created_at IS 'Время создания записи';
-COMMENT ON COLUMN dict.trailer_class.updated_by IS 'Пользователь, изменивший запись';
-COMMENT ON COLUMN dict.trailer_class.updated_at IS 'Время изменения записи';
-
-
-CREATE TABLE dict.purpose_type
-(
-    id          UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
-    code        INT4            NOT NULL UNIQUE,
-    value       VARCHAR(256)    NOT NULL,
-    description VARCHAR(2048),
-    created_by  VARCHAR(128)    NOT NULL,
-    created_at  TIMESTAMPTZ(6)  DEFAULT NOW(),
-    updated_by  VARCHAR(128),
-    updated_at  TIMESTAMPTZ(6)
-);
-
-COMMENT ON TABLE dict.purpose_type IS 'Типы назначения специальной техники';
-COMMENT ON COLUMN dict.purpose_type.id IS 'Идентификатор типа назначения специальной техники';
-COMMENT ON COLUMN dict.purpose_type.code IS 'Код типа назначения специальной техники';
-COMMENT ON COLUMN dict.purpose_type.value IS 'Название типа назначения специальной техники';
-COMMENT ON COLUMN dict.purpose_type.description IS 'Описание типа назначения специальной техники';
-COMMENT ON COLUMN dict.purpose_type.created_by IS 'Пользователь, создавший запись';
-COMMENT ON COLUMN dict.purpose_type.created_at IS 'Время создания записи';
-COMMENT ON COLUMN dict.purpose_type.updated_by IS 'Пользователь, изменивший запись';
-COMMENT ON COLUMN dict.purpose_type.updated_at IS 'Время изменения записи';
-
-
-
-CREATE TABLE dict.special_machinery_class
-(
-    id                  UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
-    vehicle_type_id     UUID,
-    code                INT4            NOT NULL UNIQUE,
-    value               VARCHAR(256)    NOT NULL,
-    description         VARCHAR(2048),
-    purpose_type_id     UUID,
-    has_equipment       BOOLEAN         NOT NULL,
-    created_by          VARCHAR(128)    NOT NULL,
-    created_at          TIMESTAMPTZ(6)  DEFAULT NOW(),
-    updated_by          VARCHAR(128),
-    updated_at          TIMESTAMPTZ(6),
-
-    CONSTRAINT fk_vehicle_type_id_special_machinery
-        FOREIGN KEY (vehicle_type_id) REFERENCES dict.vehicle_type (id)
-            ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-COMMENT ON TABLE dict.special_machinery_class IS 'Классы специальной техники';
-COMMENT ON COLUMN dict.special_machinery_class.id IS 'Идентификатор класса специальной техники';
-COMMENT ON COLUMN dict.special_machinery_class.vehicle_type_id IS 'Ссылка на тип транспортного средства';
-COMMENT ON COLUMN dict.special_machinery_class.code IS 'Код класса специальной техники';
-COMMENT ON COLUMN dict.special_machinery_class.value IS 'Название класса специальной техники';
-COMMENT ON COLUMN dict.special_machinery_class.description IS 'Описание класса специальной техники';
-COMMENT ON COLUMN dict.special_machinery_class.purpose_type_id IS 'Ссылка на назначение специальной техники';
-COMMENT ON COLUMN dict.special_machinery_class.has_equipment IS 'Наличие навесного оборудования у специальной техники';
-COMMENT ON COLUMN dict.special_machinery_class.created_by IS 'Пользователь, создавший запись';
-COMMENT ON COLUMN dict.special_machinery_class.created_at IS 'Время создания записи';
-COMMENT ON COLUMN dict.special_machinery_class.updated_by IS 'Пользователь, изменивший запись';
-COMMENT ON COLUMN dict.special_machinery_class.updated_at IS 'Время изменения записи';
-
-
 CREATE TABLE dict.brand
 (
-    id          UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
-    code        INT4            NOT NULL UNIQUE,
-    value       VARCHAR(256)    NOT NULL,
-    description VARCHAR(2048),
-    created_by  VARCHAR(128)    NOT NULL,
-    created_at  TIMESTAMPTZ(6)  DEFAULT NOW(),
-    updated_by  VARCHAR(128),
-    updated_at  TIMESTAMPTZ(6)
+    id              UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
+    country_id      UUID,
+    code            INT4            NOT NULL UNIQUE,
+    value           VARCHAR(256)    NOT NULL,
+    description     VARCHAR(2048),
+    created_by      VARCHAR(128)    NOT NULL,
+    created_at      TIMESTAMPTZ(6)  DEFAULT NOW(),
+    updated_by      VARCHAR(128),
+    updated_at      TIMESTAMPTZ(6)
 );
 
 COMMENT ON TABLE dict.brand IS 'Бренды производителей';
 COMMENT ON COLUMN dict.brand.id IS 'Идентификатор бренда';
+COMMENT ON COLUMN dict.brand.country_id IS 'Ссылка на страну бренда';
 COMMENT ON COLUMN dict.brand.code IS 'Код бренда';
 COMMENT ON COLUMN dict.brand.value IS 'Название бренда';
 COMMENT ON COLUMN dict.brand.description IS 'Описание бренда';
@@ -382,25 +100,19 @@ COMMENT ON COLUMN dict.model.updated_at IS 'Время изменения зап
 CREATE TABLE dict.generation
 (
     id              UUID                DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
-    model_id        UUID                REFERENCES dict.model (id) ON DELETE SET NULL,
     code            INT4                NOT NULL UNIQUE,
     value           VARCHAR(256)        NOT NULL,
     description     VARCHAR(2048),
     created_by      VARCHAR(128)        NOT NULL,
     created_at      TIMESTAMPTZ(6)      DEFAULT NOW(),
     updated_by      VARCHAR(128),
-    updated_at      TIMESTAMPTZ(6),
-
-    CONSTRAINT fk_model_id
-        FOREIGN KEY (model_id) REFERENCES dict.model (id)
-            ON UPDATE NO ACTION ON DELETE NO ACTION
+    updated_at      TIMESTAMPTZ(6)
 );
 
 COMMENT ON TABLE dict.generation IS 'Поколения транспортных средств';
 COMMENT ON COLUMN dict.generation.id IS 'Идентификатор поколения';
 COMMENT ON COLUMN dict.generation.code IS 'Код поколения';
 COMMENT ON COLUMN dict.generation.value IS 'Название поколения';
-COMMENT ON COLUMN dict.generation.model_id IS 'Ссылка на модель';
 COMMENT ON COLUMN dict.generation.description IS 'Описание поколения';
 COMMENT ON COLUMN dict.generation.created_by IS 'Пользователь, создавший запись';
 COMMENT ON COLUMN dict.generation.created_at IS 'Время создания записи';
@@ -454,7 +166,6 @@ COMMENT ON COLUMN dict.emission_type.updated_by IS 'Пользователь, и
 COMMENT ON COLUMN dict.emission_type.updated_at IS 'Время изменения записи';
 
 
-
 CREATE TABLE dict.engine
 (
     id                  UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
@@ -489,7 +200,6 @@ CREATE TABLE dict.engine
         FOREIGN KEY (volume) REFERENCES dict.measure_value (id)
             ON UPDATE NO ACTION ON DELETE NO ACTION
 );
-
 
 COMMENT ON TABLE dict.engine IS 'Типы двигателей';
 COMMENT ON COLUMN dict.engine.id IS 'Идентификатор двигателя';
@@ -722,76 +432,3 @@ COMMENT ON COLUMN dict.interior.created_by IS 'Пользователь, соз�
 COMMENT ON COLUMN dict.interior.created_at IS 'Время создания записи';
 COMMENT ON COLUMN dict.interior.updated_by IS 'Пользователь, изменивший запись';
 COMMENT ON COLUMN dict.interior.updated_at IS 'Время изменения записи';
-
--- todo: нужна ли эта таблица вообще ?
--- CREATE TABLE dict.safety_systems
--- (
---     id              UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
---     code            INT4            NOT NULL UNIQUE,
---     value           VARCHAR(256)    NOT NULL,
---     description     VARCHAR(2048),
---     type            VARCHAR(50), -- Тип системы (активная/пассивная)
---     is_abs          BOOLEAN,     -- Наличие ABS
---     is_esc          BOOLEAN,     -- Наличие ESC
---     airbags_amount  INT4,        -- Количество подушек безопасности
---     created_by      VARCHAR(128)    NOT NULL,
---     created_at      TIMESTAMPTZ(6)  DEFAULT NOW(),
---     updated_by      VARCHAR(128),
---     updated_at      TIMESTAMPTZ(6)
--- );
---
--- COMMENT ON TABLE dict.safety_systems IS 'Системы безопасности автомобилей';
--- COMMENT ON COLUMN dict.safety_systems.id IS 'Идентификатор системы безопасности';
--- COMMENT ON COLUMN dict.safety_systems.code IS 'Код системы безопасности';
--- COMMENT ON COLUMN dict.safety_systems.value IS 'Название типа системы безопасности';
--- COMMENT ON COLUMN dict.safety_systems.description IS 'Описание типа системы безопасности';
--- COMMENT ON COLUMN dict.created_by IS 'Пользователь, создавший запись';
--- COMMENT ON COLUMN dict.created_at IS 'Время создания записи';
--- COMMENT ON COLUMN dict.updated_by IS 'Пользователь, изменивший запись';
--- COMMENT ON COLUMN dict.updated_at IS 'Время изменения записи';
-
-
-CREATE TABLE dict.exhaust_system
-(
-    id          UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
-    code        INT4            NOT NULL UNIQUE,
-    value       VARCHAR(256)    NOT NULL,
-    description VARCHAR(2048),
-    created_by  VARCHAR(128)    NOT NULL,
-    created_at  TIMESTAMPTZ(6)  DEFAULT NOW(),
-    updated_by  VARCHAR(128),
-    updated_at  TIMESTAMPTZ(6)
-);
-
-COMMENT ON TABLE dict.exhaust_system IS 'Системы выхлопа';
-COMMENT ON COLUMN dict.exhaust_system.id IS 'Идентификатор системы выхлопа';
-COMMENT ON COLUMN dict.exhaust_system.code IS 'Код системы выхлопа';
-COMMENT ON COLUMN dict.exhaust_system.value IS 'Название системы выхлопа';
-COMMENT ON COLUMN dict.exhaust_system.description IS 'Описание системы выхлопа';
-COMMENT ON COLUMN dict.exhaust_system.created_by IS 'Пользователь, создавший запись';
-COMMENT ON COLUMN dict.exhaust_system.created_at IS 'Время создания записи';
-COMMENT ON COLUMN dict.exhaust_system.updated_by IS 'Пользователь, изменивший запись';
-COMMENT ON COLUMN dict.exhaust_system.updated_at IS 'Время изменения записи';
-
-
-CREATE TABLE dict.cooling_system
-(
-    id          UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
-    code        INT4            NOT NULL UNIQUE,
-    value       VARCHAR(256)    NOT NULL,
-    description VARCHAR(2048),
-    created_by  VARCHAR(128)    NOT NULL,
-    created_at  TIMESTAMPTZ(6)  DEFAULT NOW(),
-    updated_by  VARCHAR(128),
-    updated_at  TIMESTAMPTZ(6)
-);
-
-COMMENT ON TABLE dict.cooling_system IS 'Системы охлаждения';
-COMMENT ON COLUMN dict.cooling_system.id IS 'Идентификатор системы охлаждения';
-COMMENT ON COLUMN dict.cooling_system.code IS 'Код системы охлаждения';
-COMMENT ON COLUMN dict.cooling_system.value IS 'Название системы охлаждения';
-COMMENT ON COLUMN dict.cooling_system.description IS 'Описание системы охлаждения';
-COMMENT ON COLUMN dict.cooling_system.created_by IS 'Пользователь, создавший запись';
-COMMENT ON COLUMN dict.cooling_system.created_at IS 'Время создания записи';
-COMMENT ON COLUMN dict.cooling_system.updated_by IS 'Пользователь, изменивший запись';
-COMMENT ON COLUMN dict.cooling_system.updated_at IS 'Время изменения записи';

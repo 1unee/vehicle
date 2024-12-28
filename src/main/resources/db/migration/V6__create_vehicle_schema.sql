@@ -2,39 +2,38 @@ CREATE TABLE dict.vehicle
 (
     id                  UUID            DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
     vehicle_type_id     UUID,
+    model_id            UUID,
+    generation_id       UUID,
     body_id             UUID,
     engine_id           UUID,
     transmission_id     UUID,
     steering_id         UUID,
-    generation_id       UUID,
     interior_id         UUID,
-    exhaust_system_id   UUID,
-    cooling_system_id   UUID,
     created_by          VARCHAR(128)    NOT NULL,
     created_at          TIMESTAMPTZ(6)  DEFAULT NOW(),
     updated_by          VARCHAR(128),
     updated_at          TIMESTAMPTZ(6),
 
     CONSTRAINT fk_vehicle_type_id FOREIGN KEY (vehicle_type_id) REFERENCES dict.vehicle_type (id),
+    CONSTRAINT fk_model_id FOREIGN KEY (model_id) REFERENCES dict.model (id),
+    CONSTRAINT fk_generation_id FOREIGN KEY (generation_id) REFERENCES dict.generation (id),
     CONSTRAINT fk_body_id FOREIGN KEY (body_id) REFERENCES dict.body (id),
     CONSTRAINT fk_engine_id FOREIGN KEY (engine_id) REFERENCES dict.engine (id),
     CONSTRAINT fk_transmission_id FOREIGN KEY (transmission_id) REFERENCES dict.transmission (id),
     CONSTRAINT fk_steering_id FOREIGN KEY (steering_id) REFERENCES dict.steering (id),
-    CONSTRAINT fk_model_id FOREIGN KEY (generation_id) REFERENCES dict.generation (id),
     CONSTRAINT fk_interior_id FOREIGN KEY (interior_id) REFERENCES dict.interior (id),
     CONSTRAINT fk_exhaust_system_id FOREIGN KEY (exhaust_system_id) REFERENCES dict.exhaust_system (id),
     CONSTRAINT fk_cooling_system_id FOREIGN KEY (cooling_system_id) REFERENCES dict.cooling_system (id)
 );
 
 COMMENT ON COLUMN dict.vehicle.vehicle_type_id IS 'Ссылка на тип транспортного средства';
+COMMENT ON COLUMN dict.vehicle.model_id IS 'Ссылка на модель транспортного средства';
+COMMENT ON COLUMN dict.vehicle.generation_id IS 'Ссылка на поколение транспортного средства';
 COMMENT ON COLUMN dict.vehicle.body_id IS 'Ссылка на кузов транспортного средства';
 COMMENT ON COLUMN dict.vehicle.engine_id IS 'Ссылка на двигатель транспортного средства';
 COMMENT ON COLUMN dict.vehicle.transmission_id IS 'Ссылка на трансмиссию транспортного средства';
 COMMENT ON COLUMN dict.vehicle.steering_id IS 'Ссылка на тип рулевого механизма транспортного средства';
-COMMENT ON COLUMN dict.vehicle.generation_id IS 'Ссылка на поколение транспортного средства';
 COMMENT ON COLUMN dict.vehicle.interior_id IS 'Ссылка на интерьер автомобиля';
-COMMENT ON COLUMN dict.vehicle.exhaust_system_id IS 'Ссылка на выхлоп транспортного средства';
-COMMENT ON COLUMN dict.vehicle.cooling_system_id IS 'Ссылка на систему охлаждения транспортного средства';
 COMMENT ON COLUMN dict.vehicle.created_by IS 'Пользователь, создавший запись';
 COMMENT ON COLUMN dict.vehicle.created_at IS 'Время создания записи';
 COMMENT ON COLUMN dict.vehicle.updated_by IS 'Пользователь, изменивший запись';
